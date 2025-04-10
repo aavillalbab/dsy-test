@@ -1,0 +1,75 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Variación del Dólar por días/mes{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <h1>Variación del Dólar por días/mes</h1>
+        
+        <form method="get" class="mb-4">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="year">Año a consultar</label>
+                        <select name="year" id="year" class="form-control">
+                            {% for y in range(2020, 2025) %}
+                                <option value="{{ y }}" {{ y == year ? 'selected' : '' }}>{{ y }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="month">Mes a consultar</label>
+                        <select name="month" id="month" class="form-control">
+                            {% for m in range(1, 12) %}
+                                <option value="{{ "%02d"|format(m) }}" {{ m == month|number_format ? 'selected' : '' }}>
+                                    {{ "%02d"|format(m) }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary">Buscar</button>
+                </div>
+            </div>
+        </form>
+
+        {% if rates|length > 0 %}
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Detalle  {{ month }}/{{ year }}</h5>
+                    <a href="{{ path('app_dollar_rates', {'year': year, 'month': month, 'format': 'excel'}) }}" 
+                       class="btn btn-success">
+                        Descargar Archivo Excel
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Value</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for rate in rates %}
+                                    <tr>
+                                        <td>{{ rate.fecha }}</td>
+                                        <td>{{ rate.valor }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                No hay datos disponibles para el periodo seleccionado.
+            </div>
+        {% endif %}
+    </div>
+{% endblock %} 
