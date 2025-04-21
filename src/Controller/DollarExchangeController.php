@@ -35,12 +35,6 @@ class DollarExchangeController extends AbstractController
             if ($format === 'excel') {
                 return $this->exportToExcel($rates, $year, $month);
             }
-
-            return $this->render('dollar_exchange/index.html.twig', [
-                'rates' => $rates,
-                'year' => $year,
-                'month' => $month,
-            ]);
         } catch (\Exception $e) { /* ignored lines */ }
 
         return $this->render('dollar_exchange/index.html.twig', [
@@ -50,7 +44,7 @@ class DollarExchangeController extends AbstractController
         ]);
     }
 
-    private function exportToExcel(array $rates, string $year, string $month): array|false
+    private function exportToExcel(array $rates, string $year, string $month): Response
     {
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -67,16 +61,16 @@ class DollarExchangeController extends AbstractController
         }
 
         $writer = new Xlsx($spreadsheet);
-        $fileName = "dollar_rates_{$year}_$month.xlsx";
+        $fileName = "dollar_rates_{$year}_{$month}.xlsx";
         $tempFile = tempnam(sys_get_temp_dir(), 'dollar_exchange');
         $writer->save($tempFile);
 
-        $response = file($tempFile);
+        $response = new Response(file_get_contents($tempFile));
+        $response->headers->set('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        $response->headers->set('Content-Disposition', 'attachment;filename="' . $fileName . '"');
+        $response->headers->set('Cache-Control', 'max-age=0');
 
-        $response->setContentDisposition(
-            ResponseHeaderBag::DISPOSITION_ATTACHMENT,
-            $fileName
-        );
+        unlink($tempFile);
 
         return $response;
     }
