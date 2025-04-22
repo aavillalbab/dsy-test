@@ -11,6 +11,8 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class DollarExchangeController extends AbstractController
 {
+    private const ITEMS_PER_PAGE = 10;
+
     private CMFBanksApiService $service;
     private ExcelExportService $excelService;
 
@@ -27,6 +29,7 @@ class DollarExchangeController extends AbstractController
         $year = $request->query->get('year', date('Y'));
         $month = $request->query->get('month', date('m'));
         $format = $request->query->get('format', 'html');
+        $page = max(1, (int) $request->query->get('page', 1));
         $error = null;
 
         try {
@@ -36,7 +39,7 @@ class DollarExchangeController extends AbstractController
                 return $this->generateExcelResponse($rates, $year, $month);
             }
 
-            return $this->renderDollarExchangeView($rates, $year, $month, $error);
+            return $this->renderDollarExchangeView($rates, $year, $month, $error, $page);
         } catch (\Exception $e) {
             $error = 'Error al obtener los datos: ' . $e->getMessage();
             
@@ -44,7 +47,7 @@ class DollarExchangeController extends AbstractController
                 throw $this->createNotFoundException($error);
             }
 
-            return $this->renderDollarExchangeView($rates, $year, $month, $error);
+            return $this->renderDollarExchangeView($rates, $year, $month, $error, $page);
         }
     }
 
@@ -61,13 +64,15 @@ class DollarExchangeController extends AbstractController
         return $response;
     }
 
-    private function renderDollarExchangeView(array $rates, string $year, string $month, ?string $error = null): Response
+    private function renderDollarExchangeView(array $rates, string $year, string $month, ?string $error = null, int $page = 1): Response
     {
         return $this->render('dollar_exchange/index.html.twig', [
             'rates' => $rates,
             'year' => $year,
             'month' => $month,
             'error' => $error,
+            'page' => $page,
+            'limit' => self::ITEMS_PER_PAGE,
         ]);
     }
 }

@@ -46,42 +46,6 @@
             </div>
         </form>
 
-        {% if rates|length > 0 %}
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Detalle {{ month }}/{{ year }}</h5>
-                    <a href="{{ path('app_dollar_rates', {'year': year, 'month': month, 'format': 'excel'}) }}" 
-                       class="btn btn-success">
-                        <i class="bi bi-download"></i>
-                        Descargar Excel
-                    </a>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Fecha</th>
-                                    <th>Valor</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for rate in rates %}
-                                    <tr>
-                                        <td>{{ rate.fecha }}</td>
-                                        <td class="fw-bold">${{ rate.valor|number_format(2, ',', '.') }}</td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        {% else %}
-            <div class="alert alert-info">
-                <i class="bi bi-info-circle"></i>
-                No hay datos disponibles para el periodo seleccionado.
-            </div>
-        {% endif %}
+        {% include 'dollar_exchange/_table.html.twig' %}
     </div>
 {% endblock %} 
