@@ -16,10 +16,10 @@ class CMFBanksApiService
     private HttpClientInterface $client;
     private string $apiKey;
 
-    public function __construct(HttpClientInterface $client)
+    public function __construct(HttpClientInterface $client, string $sbfiApiKey)
     {
         $this->client = $client;
-        $this->apiKey = 'd8093171162117c0c6e8da895b00978d4e2b6a0e';
+        $this->apiKey = $sbfiApiKey;
     }
 
     /**
