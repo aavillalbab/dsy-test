@@ -31,10 +31,10 @@ class ExcelExportService
 
         // Get file contents
         $content = file_get_contents($tempFile);
-        
+
         // Clean up
         unlink($tempFile);
 
         return $content;
     }
-} 
+}

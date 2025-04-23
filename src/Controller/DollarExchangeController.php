@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Service\CMFBanksApiService;
 use App\Service\ExcelExportService;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -11,7 +12,7 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class DollarExchangeController extends AbstractController
 {
-    private const ITEMS_PER_PAGE = 10;
+    private const int ITEMS_PER_PAGE = 10;
 
     private CMFBanksApiService $service;
     private ExcelExportService $excelService;
@@ -23,14 +24,14 @@ class DollarExchangeController extends AbstractController
     }
 
     #[Route('/', name: 'app_dollar_rates')]
-    public function index(Request $request): Response
+    public function index(Request $request): Response | Exception
     {
         $rates = [];
         $year = $request->query->get('year', date('Y'));
         $month = $request->query->get('month', date('m'));
         $format = $request->query->get('format', 'html');
         $page = max(1, (int) $request->query->get('page', 1));
-        $error = null;
+        $message = null;
 
         try {
             $rates = $this->service->dollarExchange($year, $month);
@@ -39,21 +40,21 @@ class DollarExchangeController extends AbstractController
                 return $this->generateExcelResponse($rates, $year, $month);
             }
 
-            return $this->renderDollarExchangeView($rates, $year, $month, $error, $page);
-        } catch (\Exception $e) {
-            $error = 'Error al obtener los datos: ' . $e->getMessage();
-            
+            return $this->renderDollarExchangeView($rates, $year, $month, $message, $page);
+        } catch (Exception $e) {
+            $message = $e->getMessage();
+
             if ($format === 'excel') {
-                throw $this->createNotFoundException($error);
+                throw $this->createNotFoundException($message);
             }
 
-            return $this->renderDollarExchangeView($rates, $year, $month, $error, $page);
+            return $this->renderDollarExchangeView($rates, $year, $month, $message, $page);
         }
     }
 
     private function generateExcelResponse(array $rates, string $year, string $month): Response
     {
-        $fileName = "dollar_rates_{$year}_{$month}.xlsx";
+        $fileName = "dollar_rates_{$year}_$month.xlsx";
         $content = $this->excelService->createExcel($rates);
         
         $response = new Response($content);
